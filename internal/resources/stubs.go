@@ -2,7 +2,12 @@ package resources
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+var corridorTypes = []string{"maritime", "aerial", "ground", "pipeline"}
+var ruleSeverities = []string{"info", "low", "medium", "high", "critical"}
+var policyVerdicts = []string{"allow", "deny", "warn", "require_approval"}
 
 // ResourceCorridor returns the schema.Resource for the scutum_corridor resource.
 func ResourceCorridor() *schema.Resource {
@@ -10,8 +15,8 @@ func ResourceCorridor() *schema.Resource {
 		Description: "Manages a maritime or aerial corridor in the Scutum platform",
 		Schema: map[string]*schema.Schema{
 			"name":  {Type: schema.TypeString, Required: true},
-			"type":  {Type: schema.TypeString, Required: true, Description: "maritime, aerial, ground, pipeline"},
-			"width": {Type: schema.TypeFloat, Required: true, Description: "Corridor width in meters"},
+			"type":  {Type: schema.TypeString, Required: true, Description: "maritime, aerial, ground, pipeline", ValidateFunc: validation.StringInSlice(corridorTypes, false)},
+			"width": {Type: schema.TypeFloat, Required: true, Description: "Corridor width in meters", ValidateFunc: validation.FloatAtLeast(1)},
 		},
 	}
 }
@@ -22,7 +27,7 @@ func ResourceDetectionRule() *schema.Resource {
 		Description: "Manages a detection rule in the Scutum platform",
 		Schema: map[string]*schema.Schema{
 			"name":     {Type: schema.TypeString, Required: true},
-			"severity": {Type: schema.TypeString, Required: true},
+			"severity": {Type: schema.TypeString, Required: true, ValidateFunc: validation.StringInSlice(ruleSeverities, false)},
 			"category": {Type: schema.TypeString, Required: true},
 			"enabled":  {Type: schema.TypeBool, Optional: true, Default: true},
 		},
@@ -36,7 +41,7 @@ func ResourcePolicy() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name":     {Type: schema.TypeString, Required: true},
 			"category": {Type: schema.TypeString, Required: true},
-			"verdict":  {Type: schema.TypeString, Required: true},
+			"verdict":  {Type: schema.TypeString, Required: true, ValidateFunc: validation.StringInSlice(policyVerdicts, false)},
 			"enabled":  {Type: schema.TypeBool, Optional: true, Default: true},
 		},
 	}
